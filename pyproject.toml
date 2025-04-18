@@ -1,7 +1,7 @@
 [project]
-name        = "jarvis-phi35"
+name        = "jarvis-cli"
 version     = "0.1.0"
-description = "CLI wrapper around Ollama Phi‑3.5"
+description = "CLI wrapper around Ollama"
 requires-python = ">=3.9"
 dependencies = ["ollama==0.4.8", "rich==14.0.0", "click==8.1.8", "requests==2.32.3"]
 
