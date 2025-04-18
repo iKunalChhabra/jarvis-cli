@@ -14,7 +14,7 @@ import ollama                                # type: ignore[import]
 from requests.exceptions import ConnectionError, ReadTimeout
 
 LOGGER = logging.getLogger(__name__)
-MODEL_NAME: str = "phi3.5"
+MODEL_NAME: str = "gemma3:4b"
 MAX_RETRIES: int = 3
 BACKOFF_SEC: float = 1.5
 

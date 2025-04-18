@@ -112,7 +112,7 @@ def _render_response(stream: Iterator[str]) -> None:
 # ──────────────────────────────────────────────────────────────────────────
 def main() -> None:  # pragma: no cover
     console.print(
-        "[bold cyan]Jarvis Φ‑3.5 Local CLI[/] — press Ctrl‑D to quit, Ctrl‑C to cancel\n"
+        "[bold cyan]Jarvis Local CLI[/] — press Ctrl‑D to quit, Ctrl‑C to cancel\n"
     )
 
     # Lazy import to avoid circular references during unit tests
