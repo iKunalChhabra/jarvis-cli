@@ -56,6 +56,7 @@ def _read_multiline_question() -> str:
     console.print(
         "[bold magenta]You[/] "
         "(multi‑line allowed; end with blank line, /send or /new; Ctrl‑D to quit)"
+        "Ask questions about python codebase using `/scancode <path>`"
     )
 
     lines: List[str] = []
@@ -122,6 +123,13 @@ def main() -> None:  # pragma: no cover
 
     while True:
         question = _read_multiline_question()
+        if not question.strip():
+            continue
+
+        if question.strip().lower().startswith("/scancode"):
+            parts = question.split(maxsplit=1)
+            client.scan_codebase(parts[1])
+            continue
 
         # Detect sentinel commands (may be last line of buffer)
         if question.strip().lower().endswith("/new"):
@@ -129,8 +137,6 @@ def main() -> None:  # pragma: no cover
             console.print("[cyan]🔄  New chat started.[/]\n")
             continue
 
-        if not question.strip():            # empty or cancelled draft
-            continue
 
         _render_response(client.ask(question))
 

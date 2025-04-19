@@ -8,10 +8,13 @@ from __future__ import annotations
 
 import logging
 import time
+from pathlib import Path
 from typing import List, Dict, Iterator
 
 import ollama                                # type: ignore[import]
 from requests.exceptions import ConnectionError, ReadTimeout
+
+from .scanner import CodeSnapshot
 
 LOGGER = logging.getLogger(__name__)
 MODEL_NAME: str = "gemma3:4b"
@@ -64,6 +67,9 @@ class JarvisClient:
                     model=self._model,
                     messages=self._history,
                     stream=True,              # enables token streaming
+                    options={
+                        "num_ctx": 128000  # 128k context window
+                    }
                 )
                 for chunk in stream:
                     yield chunk["message"]["content"]
@@ -81,3 +87,8 @@ class JarvisClient:
                 )
                 time.sleep(BACKOFF_SEC * attempt)
         raise RuntimeError("Could not reach the Ollama server after several attempts.")
+
+    def scan_codebase(self, root: str | Path = ".") -> None:
+        from .scanner import CodeScanner  # local import (soft dep)
+        code_context = CodeScanner(root).scan()
+        self._history.insert(1, {"role": "system", "content": str(code_context)})
