@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import sys
 from contextlib import suppress
+import click
 from typing import Iterator, List
 
 from rich.console import Console, Group
@@ -111,15 +112,29 @@ def _render_response(stream: Iterator[str]) -> None:
 # ──────────────────────────────────────────────────────────────────────────
 # Main loop
 # ──────────────────────────────────────────────────────────────────────────
-def main() -> None:  # pragma: no cover
+@click.command()
+@click.option(
+    "--model", default="gemma3:4b", help="Ollama model name to use", show_default=True
+)
+@click.option(
+    "--context",
+    "context_window",
+    default=8192,
+    type=int,
+    help="Maximum context window size",
+    show_default=True,
+)
+def cli(model: str, context_window: int) -> None:
+    """
+    Jarvis CLI for chatting with a local Ollama model.
+    """
     console.print(
-        "[bold cyan]Jarvis Local CLI[/] — press Ctrl‑D to quit, Ctrl‑C to cancel\n"
+        f"[bold cyan]Jarvis Local CLI[/] — model: [magenta]{model}[/], context: [yellow]{context_window} tokens[/]\n"
+        "Press Ctrl‑D to quit, Ctrl‑C to cancel\n"
     )
 
-    # Lazy import to avoid circular references during unit tests
     from .client import JarvisClient
-
-    client = JarvisClient()
+    client = JarvisClient(model=model, context_size = context_window)
 
     while True:
         question = _read_multiline_question()
@@ -131,22 +146,17 @@ def main() -> None:  # pragma: no cover
             client.scan_codebase(parts[1])
             continue
 
-        # Detect sentinel commands (may be last line of buffer)
         if question.strip().lower().endswith("/new"):
             client.reset()
             console.print("[cyan]🔄  New chat started.[/]\n")
             continue
 
-
         _render_response(client.ask(question))
 
 
-# ──────────────────────────────────────────────────────────────────────────
-# CLI entry‑point
-# ──────────────────────────────────────────────────────────────────────────
-if __name__ == "__main__":                  # pragma: no cover
+if __name__ == "__main__":
     try:
-        main()
+        cli()
     except KeyboardInterrupt:
         console.print("\nGood‑bye 👋", style="cyan")
         sys.exit(0)

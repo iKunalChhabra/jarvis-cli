@@ -17,7 +17,6 @@ from requests.exceptions import ConnectionError, ReadTimeout
 from .scanner import CodeSnapshot
 
 LOGGER = logging.getLogger(__name__)
-MODEL_NAME: str = "gemma3:4b"
 MAX_RETRIES: int = 3
 BACKOFF_SEC: float = 1.5
 
@@ -25,8 +24,9 @@ BACKOFF_SEC: float = 1.5
 class JarvisClient:
     """Wrapper around ``ollama.chat`` with streaming support and retries."""
 
-    def __init__(self, model: str = MODEL_NAME) -> None:
+    def __init__(self, model: str, context_size: int) -> None:
         self._model = model
+        self.context_size = context_size
         self._history: List[Dict[str, str]] = [
             {
                 "role": "system",
@@ -68,7 +68,7 @@ class JarvisClient:
                     messages=self._history,
                     stream=True,              # enables token streaming
                     options={
-                        "num_ctx": 128000  # 128k context window
+                        "num_ctx": self.context_size,
                     }
                 )
                 for chunk in stream:
